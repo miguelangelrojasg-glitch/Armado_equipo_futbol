@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Eliminar lista | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor centrado idéntico al de editar_lista */
+    .focus-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+
+    /* Estilo para la caja de advertencia */
+    .alert-danger-custom {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        color: #fca5a5;
+        font-size: 0.95rem;
+    }
+
+    /* Botón de eliminar con estilo consistente al resto de la app */
+    .btn-danger-custom {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 10px 18px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-danger-custom:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+        color: white;
+    }
+
+    /* Efecto de borde rojo sutil en la tarjeta */
+    .glass-card-danger {
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center focus-container">
+    <div class="col-lg-5 col-md-8">
+        <div class="glass-card glass-card-danger p-5 text-center">
+            
+            <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width: 70px; height: 70px; border-radius: 20px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                <i class="bi bi-exclamation-triangle fs-1"></i>
+            </div>
+
+            <h2 class="fw-bold mb-3 text-white">¿Eliminar lista?</h2>
+            
+            <p class="text-light mb-4" style="font-size: 1.1rem;">
+                Estás a punto de borrar definitivamente la lista<br>
+                <strong class="fs-4 text-white mt-2 d-block">"{{ lista.nombre }}"</strong>
+            </p>
+
+            <div class="alert alert-danger-custom text-start mb-4 p-3 d-flex align-items-start gap-3">
+                <i class="bi bi-info-circle-fill mt-1"></i>
+                <div>
+                    <strong>Esta acción no se puede deshacer.</strong><br>
+                    Se van a perder los <strong>{{ lista.jugadores.count }} jugadores</strong> que ya tenías cargados en esta convocatoria.
+                </div>
+            </div>
+
+            <form method="post" action="">
+                {% csrf_token %}
+                
+                <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+                <div class="d-flex justify-content-between align-items-center gap-3 mt-4">
+                    <a href="{% url 'index' %}" class="btn btn-soft flex-grow-1 text-center">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger-custom flex-grow-1">
+                        <i class="bi bi-trash3-fill me-1"></i> Sí, eliminar
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

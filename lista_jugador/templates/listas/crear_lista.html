@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}Crear lista | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor centrado para mantener coherencia */
+    .focus-container {
+        min-height: calc(100vh - 150px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+
+    .create-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    /* Píldora de paso actual */
+    .step-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: var(--accent-green);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+    }
+
+    /* Inputs personalizados (igual que en login/editar) */
+    .form-control-custom,
+    .form-select-custom {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        color: white;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        width: 100%;
+        appearance: none; /* Quita la flecha por defecto del select para personalizarla */
+    }
+
+    /* Ajuste de color para las opciones del select en PC */
+    .form-select-custom option {
+        background-color: var(--bg-main);
+        color: white;
+    }
+
+    .form-control-custom:focus,
+    .form-select-custom:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        outline: none;
+    }
+
+    .form-control-custom::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+    .input-icon-wrapper i.icon-left {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+
+    /* Flecha personalizada para el select */
+    .input-icon-wrapper i.icon-right {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%);
+        color: var(--text-soft);
+        pointer-events: none;
+    }
+
+    .input-icon-wrapper .form-control-custom,
+    .input-icon-wrapper .form-select-custom {
+        padding-left: 45px;
+    }
+
+    /* Caja de información del flujo */
+    .info-box {
+        background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        border: 1px solid var(--border-soft);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 35px;
+    }
+
+    .info-box ul {
+        margin: 0;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .info-box li {
+        margin-bottom: 12px;
+        color: #cbd5e1;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.9rem;
+    }
+
+    .info-box li i {
+        color: var(--accent-blue);
+        margin-top: 2px;
+    }
+    
+    .info-box li:last-child {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center focus-container">
+    <div class="col-lg-7 col-xl-6">
+
+        <div class="glass-card p-5">
+
+            <div class="text-center text-md-start">
+                <div class="step-pill">
+                    <i class="bi bi-1-circle-fill"></i> Paso 1
+                </div>
+
+                <h1 class="create-title text-white">Crear nueva lista</h1>
+                <p class="text-soft mb-4">
+                    Ingresá el nombre de tu convocatoria y definí cuántos jugadores van a entrar a la cancha.
+                </p>
+            </div>
+
+            <form method="post" action="">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label for="nombre" class="form-label">Nombre de la lista</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-card-text icon-left"></i>
+                        <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            class="form-control-custom"
+                            placeholder="Ej: Fútbol 7 Viernes, Amigos del barrio..."
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="cantidad" class="form-label">Cantidad de jugadores</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-people icon-left"></i>
+                        <select id="cantidad" name="cantidad" class="form-select-custom" required>
+                            <option value="" disabled selected>Seleccionar cantidad...</option>
+                            <option value="10">10 jugadores (Fútbol 5)</option>
+                            <option value="12">12 jugadores (Fútbol 6)</option>
+                            <option value="14">14 jugadores (Fútbol 7)</option>
+                            <option value="16">16 jugadores (Fútbol 8)</option>
+                            <option value="18">18 jugadores (Fútbol 9)</option>
+                            <option value="20">20 jugadores</option>
+                            <option value="22">22 jugadores (Fútbol 11)</option>
+                        </select>
+                        <i class="bi bi-chevron-down icon-right"></i>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center gap-3 mt-5">
+                    <a href="{% url 'index' %}" class="btn btn-soft flex-grow-1 text-center">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-main flex-grow-1">
+                        Continuar <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="info-box">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2 text-white">
+                    <i class="bi bi-info-circle text-warning"></i> Cómo sigue el proceso
+                </h6>
+                <ul>
+                    <li>
+                        <i class="bi bi-check2-square"></i>
+                        Primero cargás el nombre y la cantidad de jugadores.
+                    </li>
+                    <li>
+                        <i class="bi bi-person-lines-fill"></i>
+                        Después ingresás jugador por jugador con sus atributos base y posición principal.
+                    </li>
+                    <li>
+                        <i class="bi bi-star"></i>
+                        Luego elegís hasta 2 atributos especiales por jugador que marcarán la diferencia en el simulador.
+                    </li>
+                    <li>
+                        <i class="bi bi-layout-text-sidebar-reverse"></i>
+                        Al finalizar, vas al resumen final con opciones para editar o iniciar el armado de equipos.
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

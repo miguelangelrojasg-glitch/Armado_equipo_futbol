@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block title %}Agregar jugador | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor principal */
+    .focus-container {
+        padding: 2rem 0;
+    }
+
+    .form-card {
+        padding: 35px;
+        border-radius: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-main);
+    }
+
+    .section-title {
+        font-weight: 800;
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+    }
+
+    /* Barra de progreso de la lista */
+    .list-progress-bg {
+        background: rgba(0,0,0,0.3);
+        height: 6px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    
+    .list-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+        border-radius: 10px;
+    }
+
+    /* Estilos de inputs generales */
+    .form-control-custom, .form-select-custom {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        color: white;
+        border-radius: 12px;
+        padding: 12px 16px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-select-custom {
+        appearance: none;
+    }
+
+    .form-select-custom option {
+        background-color: var(--bg-main);
+        color: white;
+    }
+
+    .form-control-custom:focus, .form-select-custom:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        outline: none;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    /* Contenedores de inputs con íconos */
+    .input-icon-wrapper { position: relative; }
+    .input-icon-wrapper i.icon-left {
+        position: absolute; top: 50%; left: 16px; transform: translateY(-50%);
+        color: var(--text-soft); font-size: 1.1rem; pointer-events: none;
+    }
+    .input-icon-wrapper i.icon-right {
+        position: absolute; top: 50%; right: 16px; transform: translateY(-50%);
+        color: var(--text-soft); pointer-events: none;
+    }
+    .input-icon-wrapper .form-control-custom,
+    .input-icon-wrapper .form-select-custom { padding-left: 45px; }
+
+    /* Estilos para los Range Sliders (Atributos) */
+    .atributo-box {
+        padding: 20px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 16px;
+    }
+
+    .range-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .range-value {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--accent-blue);
+        background: rgba(56, 189, 248, 0.1);
+        padding: 2px 12px;
+        border-radius: 8px;
+    }
+
+    /* Personalización del Range Input */
+    input[type=range] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        cursor: pointer;
+        margin-top: -7px;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    /* Select múltiple */
+    .form-select-multiple {
+        height: auto;
+        padding: 8px;
+    }
+    .form-select-multiple option {
+        padding: 10px;
+        margin-bottom: 4px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .form-select-multiple option:checked {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(56, 189, 248, 0.5));
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center focus-container">
+    <div class="col-lg-8 col-xl-7">
+
+        <div class="glass-card form-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="fw-bold m-0"><i class="bi bi-person-plus-fill text-success me-2"></i>Agregar jugador</h2>
+                <span class="badge bg-dark border border-secondary p-2">
+                    <i class="bi bi-list-ul me-1"></i> {{ lista.nombre }}
+                </span>
+            </div>
+            
+            <div class="mb-4">
+                <div class="d-flex justify-content-between text-soft small mt-2">
+                    <span>Progreso de carga</span>
+                    <strong>{{ lista.jugadores.count }} / {{ lista.cantidad_jugadores }}</strong>
+                </div>
+                <div class="list-progress-bg">
+                    <div class="list-progress-bar" style="width: {% widthratio lista.jugadores.count lista.cantidad_jugadores 100 %}%;"></div>
+                </div>
+            </div>
+
+            <form method="post" action="">
+                {% csrf_token %}
+
+                <h5 class="section-title mt-4 pt-2">
+                    <i class="bi bi-person-badge"></i> Datos Básicos
+                </h5>
+
+                <div class="mb-4">
+                    <label for="nombre" class="form-label">Nombre o apodo</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-type icon-left"></i>
+                        <input type="text" id="nombre" name="nombre" class="form-control-custom" placeholder="Ej: Leo, El tanque..." required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="posicion_principal" class="form-label">Posición principal</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-geo-alt icon-left"></i>
+                            <select id="posicion_principal" name="posicion_principal" class="form-select-custom" required>
+                                <option value="" disabled selected>Seleccionar...</option>
+                                <option value="ARQ">🧤 Arquero</option>
+                                <option value="DEF">🛡️ Defensor</option>
+                                <option value="MED">🧠 Mediocampista</option>
+                                <option value="DEL">⚡ Delantero</option>
+                            </select>
+                            <i class="bi bi-chevron-down icon-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="posicion_secundaria" class="form-label">Posición secundaria</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-geo icon-left"></i>
+                            <select id="posicion_secundaria" name="posicion_secundaria" class="form-select-custom">
+                                <option value="" selected>Ninguna (Opcional)</option>
+                                <option value="ARQ">🧤 Arquero</option>
+                                <option value="DEF">🛡️ Defensor</option>
+                                <option value="MED">🧠 Mediocampista</option>
+                                <option value="DEL">⚡ Delantero</option>
+                            </select>
+                            <i class="bi bi-chevron-down icon-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+                <h5 class="section-title">
+                    <i class="bi bi-sliders"></i> Atributos (1 al 10)
+                </h5>
+
+                <div class="atributo-box">
+                    <div class="range-header">
+                        <label class="form-label m-0"><i class="bi bi-crosshair me-1"></i> Ataque</label>
+                        <span class="range-value" id="val-ataque">5</span>
+                    </div>
+                    <input type="range" name="ataque" min="1" max="10" value="5" oninput="document.getElementById('val-ataque').innerText = this.value" required>
+                </div>
+
+                <div class="atributo-box">
+                    <div class="range-header">
+                        <label class="form-label m-0"><i class="bi bi-shield-shaded me-1"></i> Defensa</label>
+                        <span class="range-value" id="val-defensa">5</span>
+                    </div>
+                    <input type="range" name="defensa" min="1" max="10" value="5" oninput="document.getElementById('val-defensa').innerText = this.value" required>
+                </div>
+
+                <div class="atributo-box">
+                    <div class="range-header">
+                        <label class="form-label m-0"><i class="bi bi-magic me-1"></i> Técnica</label>
+                        <span class="range-value" id="val-tecnica">5</span>
+                    </div>
+                    <input type="range" name="tecnica" min="1" max="10" value="5" oninput="document.getElementById('val-tecnica').innerText = this.value" required>
+                </div>
+
+                <div class="atributo-box">
+                    <div class="range-header">
+                        <label class="form-label m-0"><i class="bi bi-lightning-charge me-1"></i> Físico</label>
+                        <span class="range-value" id="val-fisico">5</span>
+                    </div>
+                    <input type="range" name="fisico" min="1" max="10" value="5" oninput="document.getElementById('val-fisico').innerText = this.value" required>
+                </div>
+
+                <div class="atributo-box border-warning" style="background: rgba(255, 193, 7, 0.05);">
+                    <div class="range-header">
+                        <label class="form-label m-0 text-warning"><i class="bi bi-person-arms-up me-1"></i> Atributo de arquero</label>
+                        <span class="range-value text-warning bg-warning bg-opacity-10" id="val-arquero">5</span>
+                    </div>
+                    <input type="range" name="arquero" min="1" max="10" value="5" oninput="document.getElementById('val-arquero').innerText = this.value" required>
+                </div>
+
+                <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+                <h5 class="section-title">
+                    <i class="bi bi-star-fill text-warning"></i> Especialidades
+                </h5>
+                <p class="text-soft small mb-3">Mantén presionado <code>Ctrl</code> (o <code>Cmd</code> en Mac) para seleccionar hasta 2.</p>
+
+                <div class="mb-4">
+                    <select name="atributos_especiales" multiple class="form-control-custom form-select-multiple" size="5">
+                        <option value="mago">🪄 Mago (Técnica superior)</option>
+                        <option value="pulpo">🐙 Pulpo (Recuperación)</option>
+                        <option value="titan">🏔️ Titán (Fuerza física)</option>
+                        <option value="veloz">🚀 Veloz (Velocidad punta)</option>
+                        <option value="francotirador">🎯 Francotirador (Remate)</option>
+                        <option value="muro">🧱 Muro (Defensa impenetrable)</option>
+                        <option value="fantasma">👻 Fantasma (Desmarque)</option>
+                        <option value="bombardero">💣 Bombardero (Potencia)</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center gap-3 mt-5">
+                    <a href="{% url 'resumen_lista' lista.id %}" class="btn btn-soft flex-grow-1 text-center">
+                        <i class="bi bi-arrow-left me-1"></i> Volver
+                    </a>
+                    <button type="submit" class="btn btn-main flex-grow-1">
+                        <i class="bi bi-plus-circle me-1"></i> Guardar Jugador
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

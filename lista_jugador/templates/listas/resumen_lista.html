@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% block title %}{{ lista.nombre }} - Resumen | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-header {
+        padding: 30px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(18, 25, 46, 0.9), rgba(11, 16, 32, 0.95));
+        border: 1px solid var(--border-soft);
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .summary-header::after {
+        content: "";
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: radial-gradient(circle at top right, rgba(56,189,248,0.1), transparent 50%);
+        pointer-events: none;
+    }
+
+    .list-progress-bg {
+        background: rgba(0,0,0,0.4);
+        height: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .list-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+
+    .player-row {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+    }
+
+    .player-row:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(56, 189, 248, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .pos-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .pos-ARQ { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .pos-DEF { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .pos-MED { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .stat-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .stat-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 6px 12px;
+        min-width: 50px;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-val {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .specialty-icon {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(56, 189, 248, 0.2));
+        color: #c084fc;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    /* Estilos mejorados para los botones de acción del jugador */
+    .player-actions {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .btn-edit-player {
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+    }
+
+    .btn-edit-player:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+
+    .btn-delete-player {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 10px;
+    }
+
+    .btn-delete-player:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .bottom-action-bar {
+        position: sticky;
+        bottom: 20px;
+        background: rgba(18, 25, 46, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--accent-blue);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);
+        z-index: 100;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="summary-header glass-card">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
+                    <i class="bi bi-calendar-event"></i> Partido
+                </span>
+            </div>
+            <h1 class="fw-bold m-0 text-white" style="font-size: 2.2rem;">{{ lista.nombre }}</h1>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'editar_lista' lista.id %}" class="btn btn-soft">
+                <i class="bi bi-pencil-square me-1"></i> Editar Lista
+            </a>
+        </div>
+    </div>
+
+    <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+    <div class="row align-items-center">
+        <div class="col-md-8 mb-3 mb-md-0">
+            <div class="d-flex justify-content-between text-soft small mb-1">
+                <span class="fw-medium">Jugadores convocados</span>
+                <span class="fw-bold text-white">{{ lista.jugadores.count }} de {{ lista.cantidad_jugadores }}</span>
+            </div>
+            <div class="list-progress-bg">
+                <div class="list-progress-bar" style="width: {% widthratio lista.jugadores.count lista.cantidad_jugadores 100 %}%;"></div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 text-md-end">
+            {% if lista.jugadores.count < lista.cantidad_jugadores %}
+                <a href="{% url 'agregar_jugador' lista.id %}" class="btn btn-main w-100 py-2">
+                    <i class="bi bi-person-plus-fill me-2"></i> Agregar Jugador
+                </a>
+            {% else %}
+                <span class="badge bg-success bg-opacity-20 text-success p-2 border border-success w-100 d-flex align-items-center justify-content-center" style="font-size: 1rem; height: 100%;">
+                    <i class="bi bi-check-circle-fill me-2"></i> Plantilla Completa
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="mb-5">
+    <h4 class="fw-bold mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-people"></i> Plantilla Actual
+    </h4>
+
+    {% if lista.jugadores.all %}
+        
+        <div class="d-flex flex-column">
+            {% for jugador in lista.jugadores.all %}
+                <div class="player-row flex-column flex-xl-row gap-4">
+                    
+                    <div class="d-flex align-items-center gap-3 flex-grow-1" style="min-width: 250px;">
+                        <div class="pos-badge pos-{{ jugador.posicion_principal }}">
+                            {{ jugador.posicion_principal }}
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-white fs-4">{{ jugador.nombre }}</h5>
+                            <div class="text-soft mt-1">
+                                {% if jugador.posicion_secundaria %}
+                                    <i class="bi bi-arrow-return-right"></i> Alt: {{ jugador.posicion_secundaria }}
+                                {% endif %}
+                                
+                                {% if jugador.atributos_especiales %}
+                                    <span class="ms-2 specialty-icon">
+                                        <i class="bi bi-star-fill"></i> Especialista
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-group flex-wrap justify-content-start justify-content-xl-center flex-grow-1">
+                        <div class="stat-badge">
+                            <span class="stat-label">ATQ</span>
+                            <span class="stat-val">{{ jugador.ataque }}</span>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-label">DEF</span>
+                            <span class="stat-val">{{ jugador.defensa }}</span>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-label">TEC</span>
+                            <span class="stat-val">{{ jugador.tecnica }}</span>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-label">FIS</span>
+                            <span class="stat-val">{{ jugador.fisico }}</span>
+                        </div>
+                        {% if jugador.posicion_principal == 'ARQ' or jugador.posicion_secundaria == 'ARQ' %}
+                        <div class="stat-badge" style="border: 1px solid rgba(234, 179, 8, 0.4);">
+                            <span class="stat-label text-warning">ARQ</span>
+                            <span class="stat-val text-warning">{{ jugador.arquero }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="player-actions mt-3 mt-xl-0 flex-grow-0" style="min-width: 200px;">
+                        <a href="{% url 'editar_jugador' jugador.id %}" class="btn btn-edit-player flex-grow-1">
+                            <i class="bi bi-pencil-square me-1"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_jugador' jugador.id %}" class="btn btn-delete-player flex-grow-1">
+                            <i class="bi bi-trash3 me-1"></i> Borrar
+                        </a>
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="glass-card text-center py-5 border-dashed">
+            <div class="mb-4">
+                <i class="bi bi-person-plus text-soft" style="font-size: 4rem; opacity: 0.5;"></i>
+            </div>
+            <h4 class="fw-bold mb-3">Todavía no hay jugadores</h4>
+            <p class="text-soft mb-4">La lista está vacía. Empezá a cargar los perfiles para armar el partido.</p>
+            <a href="{% url 'agregar_jugador' lista.id %}" class="btn btn-main btn-lg">
+                <i class="bi bi-plus-circle me-2"></i> Cargar el primer jugador
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% if lista.jugadores.count == lista.cantidad_jugadores %}
+<div class="bottom-action-bar d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div>
+        <h5 class="fw-bold text-white mb-1"><i class="bi bi-check2-all text-success"></i> ¡Plantilla Lista!</h5>
+        <p class="text-soft mb-0 small">Tenés los {{ lista.cantidad_jugadores }} jugadores cargados. Ya podés generar el partido.</p>
+    </div>
+    
+    <a href="#" class="btn btn-main btn-lg px-5 shadow-lg" style="white-space: nowrap;">
+        <i class="bi bi-shuffle me-2"></i> Generar Equipos
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

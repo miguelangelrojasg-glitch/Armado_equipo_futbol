@@ -291,7 +291,7 @@ def agregar_jugador(request, lista_id):
 
     return render(
         request,
-        "jugadores/agregar_jugador.html",
+        "listas/agregar_jugador.html",
         {
             "lista": lista,
             "campos_ataque": campos_ataque,

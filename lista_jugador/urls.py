@@ -13,10 +13,10 @@ urlpatterns = [
     # -----------------------------------------
     path("accounts/registro/", views.registro, name="registro"),
     
-    # Conectamos el login nativo de Django con tu plantilla personalizada
+    # ¡ACÁ ESTÁ EL AJUSTE! Agregamos "registration/" a la ruta del template
     path(
         "accounts/login/", 
-        auth_views.LoginView.as_view(template_name="login.html"), 
+        auth_views.LoginView.as_view(template_name="registration/login.html"), 
         name="login"
     ),
     
@@ -41,8 +41,6 @@ urlpatterns = [
     # -----------------------------------------
     # GESTIÓN DE JUGADORES
     # -----------------------------------------
-    # Detalle menor: unifiqué a plural ("jugadores/agregar") para que quede más 
-    # prolijo con el resto, pero el 'name' sigue siendo el mismo.
     path(
         "listas/<int:lista_id>/jugadores/agregar/",
         views.agregar_jugador,
@@ -59,5 +57,19 @@ urlpatterns = [
         "jugadores/<int:jugador_id>/eliminar/",
         views.eliminar_jugador,
         name="eliminar_jugador"
+    ),
+# -----------------------------------------
+    # ARMADO DE EQUIPOS
+    # -----------------------------------------
+    path(
+        "listas/<int:lista_id>/configurar-equipos/",
+        views.configurar_equipos,
+        name="configurar_equipos"
+    ),
+
+    path(
+        "listas/<int:lista_id>/ver-equipos/",
+        views.ver_equipos,
+        name="ver_equipos"
     ),
 ]

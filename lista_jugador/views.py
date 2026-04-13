@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import AtributoEspecial, Jugador, ListaJugadores
-
+from .algoritmo_equipos import armar_equipos
 
 # ------------------------
 # UTILIDAD
@@ -174,58 +174,11 @@ def agregar_jugador(request, lista_id):
         return redirect("resumen_lista", lista_id=lista.id)
 
     # Campos por rubro para usar en el template
-    campos_ataque = [
-        "finalizacion",
-        "remate_cabeza",
-        "desmarque",
-        "vision_juego",
-        "tiros_lejanos",
-        "penales",
-        "saques_esquina",
-        "tiros_libres",
-    ]
-
-    campos_defensa = [
-        "entradas",
-        "marcaje",
-        "anticipacion",
-        "colocacion",
-        "intercepciones",
-        "despeje",
-    ]
-
-    campos_tecnica = [
-        "control_balon",
-        "regate",
-        "pases_cortos",
-        "pases_largos",
-        "centros",
-        "efecto",
-        "tecnica_disparo",
-        "juego_espaldas",
-    ]
-
-    campos_fisico = [
-        "velocidad",
-        "aceleracion",
-        "resistencia",
-        "fuerza",
-        "salto",
-        "agilidad",
-        "equilibrio",
-        "potencia_salto",
-    ]
-
-    campos_arquero = [
-        "reflejos",
-        "estirada",
-        "manejo_area",
-        "blocaje",
-        "saque_meta",
-        "saque_mano",
-        "uno_contra_uno",
-        "comunicacion",
-    ]
+    campos_ataque = ["finalizacion", "remate_cabeza", "desmarque", "vision_juego", "tiros_lejanos", "penales", "saques_esquina", "tiros_libres"]
+    campos_defensa = ["entradas", "marcaje", "anticipacion", "colocacion", "intercepciones", "despeje"]
+    campos_tecnica = ["control_balon", "regate", "pases_cortos", "pases_largos", "centros", "efecto", "tecnica_disparo", "juego_espaldas"]
+    campos_fisico = ["velocidad", "aceleracion", "resistencia", "fuerza", "salto", "agilidad", "equilibrio", "potencia_salto"]
+    campos_arquero = ["reflejos", "estirada", "manejo_area", "blocaje", "saque_meta", "saque_mano", "uno_contra_uno", "comunicacion"]
 
     if request.method == "POST":
         jugador = Jugador(
@@ -284,10 +237,26 @@ def agregar_jugador(request, lista_id):
         )
 
         jugador.save()
+
+        # Guardar atributos especiales en la misma pantalla
+        atributos_ids = request.POST.getlist("atributos_especiales")
+        if atributos_ids:
+            seleccionados = AtributoEspecial.objects.filter(
+                id__in=atributos_ids,
+                posicion=jugador.posicion_principal
+            )[:2] # Aseguramos un máximo de 2 por seguridad
+            jugador.atributos_especiales.set(seleccionados)
+
         jugador.recalcular_nivel()
 
-        messages.success(request, "Jugador creado correctamente.")
-        return redirect("editar_jugador", jugador_id=jugador.id)
+        # === EL BUCLE INTELIGENTE ===
+        if lista.jugadores.count() >= lista.cantidad_jugadores:
+            messages.success(request, f"¡Excelente! Completaste los {lista.cantidad_jugadores} jugadores. Pasando al resumen.")
+            return redirect("resumen_lista", lista_id=lista.id)
+        else:
+            jugadores_restantes = lista.cantidad_jugadores - lista.jugadores.count()
+            messages.success(request, f"Jugador guardado con éxito. Faltan cargar {jugadores_restantes} jugadores más.")
+            return redirect("agregar_jugador", lista_id=lista.id)
 
     return render(
         request,
@@ -317,15 +286,66 @@ def editar_jugador(request, jugador_id):
         lista__usuario=request.user
     )
     lista = jugador.lista
-
-    # Solo atributos especiales de la posición principal
-    atributos_especiales = AtributoEspecial.objects.filter(
-        posicion=jugador.posicion_principal
-    )
+    atributos_especiales = AtributoEspecial.objects.filter(posicion=jugador.posicion_principal)
 
     if request.method == "POST":
-        atributos_ids = request.POST.getlist("atributos_especiales")
+        # Actualizar datos básicos
+        jugador.nombre = request.POST.get("nombre")
+        jugador.posicion_principal = request.POST.get("posicion_principal")
+        jugador.posicion_secundaria = request.POST.get("posicion_secundaria") or None
 
+        # Actualizar ATAQUE
+        jugador.finalizacion = to_int(request.POST.get("finalizacion"))
+        jugador.remate_cabeza = to_int(request.POST.get("remate_cabeza"))
+        jugador.desmarque = to_int(request.POST.get("desmarque"))
+        jugador.vision_juego = to_int(request.POST.get("vision_juego"))
+        jugador.tiros_lejanos = to_int(request.POST.get("tiros_lejanos"))
+        jugador.penales = to_int(request.POST.get("penales"))
+        jugador.saques_esquina = to_int(request.POST.get("saques_esquina"))
+        jugador.tiros_libres = to_int(request.POST.get("tiros_libres"))
+
+        # Actualizar DEFENSA
+        jugador.entradas = to_int(request.POST.get("entradas"))
+        jugador.marcaje = to_int(request.POST.get("marcaje"))
+        jugador.anticipacion = to_int(request.POST.get("anticipacion"))
+        jugador.colocacion = to_int(request.POST.get("colocacion"))
+        jugador.intercepciones = to_int(request.POST.get("intercepciones"))
+        jugador.despeje = to_int(request.POST.get("despeje"))
+
+        # Actualizar TECNICA
+        jugador.control_balon = to_int(request.POST.get("control_balon"))
+        jugador.regate = to_int(request.POST.get("regate"))
+        jugador.pases_cortos = to_int(request.POST.get("pases_cortos"))
+        jugador.pases_largos = to_int(request.POST.get("pases_largos"))
+        jugador.centros = to_int(request.POST.get("centros"))
+        jugador.efecto = to_int(request.POST.get("efecto"))
+        jugador.tecnica_disparo = to_int(request.POST.get("tecnica_disparo"))
+        jugador.juego_espaldas = to_int(request.POST.get("juego_espaldas"))
+
+        # Actualizar FISICO
+        jugador.velocidad = to_int(request.POST.get("velocidad"))
+        jugador.aceleracion = to_int(request.POST.get("aceleracion"))
+        jugador.resistencia = to_int(request.POST.get("resistencia"))
+        jugador.fuerza = to_int(request.POST.get("fuerza"))
+        jugador.salto = to_int(request.POST.get("salto"))
+        jugador.agilidad = to_int(request.POST.get("agilidad"))
+        jugador.equilibrio = to_int(request.POST.get("equilibrio"))
+        jugador.potencia_salto = to_int(request.POST.get("potencia_salto"))
+
+        # Actualizar ARQUERO
+        jugador.reflejos = to_int(request.POST.get("reflejos"))
+        jugador.estirada = to_int(request.POST.get("estirada"))
+        jugador.manejo_area = to_int(request.POST.get("manejo_area"))
+        jugador.blocaje = to_int(request.POST.get("blocaje"))
+        jugador.saque_meta = to_int(request.POST.get("saque_meta"))
+        jugador.saque_mano = to_int(request.POST.get("saque_mano"))
+        jugador.uno_contra_uno = to_int(request.POST.get("uno_contra_uno"))
+        jugador.comunicacion = to_int(request.POST.get("comunicacion"))
+
+        jugador.save()
+
+        # Actualizar atributos especiales
+        atributos_ids = request.POST.getlist("atributos_especiales")
         if len(atributos_ids) > 2:
             messages.error(request, "Podés seleccionar hasta 2 atributos especiales.")
             return redirect("editar_jugador", jugador_id=jugador.id)
@@ -334,17 +354,13 @@ def editar_jugador(request, jugador_id):
             id__in=atributos_ids,
             posicion=jugador.posicion_principal
         )
-
         jugador.atributos_especiales.set(seleccionados)
         jugador.recalcular_nivel()
 
-        jugadores_actuales = Jugador.objects.filter(lista=lista).count()
-
-        if jugadores_actuales >= lista.cantidad_jugadores:
-            messages.success(request, "Lista completa. Pasando al resumen.")
-            return redirect("resumen_lista", lista_id=lista.id)
-
-        return redirect("agregar_jugador", lista_id=lista.id)
+        messages.success(request, "Jugador actualizado correctamente.")
+        
+        # Una vez editado, te devuelve directamente al resumen
+        return redirect("resumen_lista", lista_id=lista.id)
 
     return render(
         request,
@@ -354,7 +370,6 @@ def editar_jugador(request, jugador_id):
             "atributos_especiales": atributos_especiales,
         }
     )
-
 
 # ------------------------
 # RESUMEN DE LISTA
@@ -401,3 +416,83 @@ def eliminar_jugador(request, jugador_id):
 
     messages.success(request, "Jugador eliminado correctamente.")
     return redirect("agregar_jugador", lista_id=lista.id)
+
+# ------------------------
+# CONFIGURAR EQUIPOS (Elegir enfoque)
+# ------------------------
+
+@login_required
+def configurar_equipos(request, lista_id):
+    lista = get_object_or_404(ListaJugadores, id=lista_id, usuario=request.user)
+
+    if request.method == "POST":
+        # Capturamos el enfoque deseado para cada equipo
+        enfoque_a = request.POST.get("enfoque_a", "EQUILIBRADO")
+        enfoque_b = request.POST.get("enfoque_b", "EQUILIBRADO")
+        
+        # Lo guardamos en la sesión para pasarlo a la siguiente vista
+        request.session[f'enfoque_a_{lista.id}'] = enfoque_a
+        request.session[f'enfoque_b_{lista.id}'] = enfoque_b
+        
+        # Iniciamos la "semilla" de mezcla en 1
+        request.session[f'seed_{lista.id}'] = 1
+        
+        return redirect("ver_equipos", lista_id=lista.id)
+        
+    return render(
+        request, 
+        "equipos/configurar_equipos.html", 
+        {"lista": lista}
+    )
+
+# ------------------------
+# VER Y REARMAR EQUIPOS
+# ------------------------
+
+@login_required
+def ver_equipos(request, lista_id):
+    lista = get_object_or_404(ListaJugadores, id=lista_id, usuario=request.user)
+    jugadores = list(lista.jugadores.all())
+    
+    if not jugadores:
+        messages.error(request, "No hay jugadores para armar equipos.")
+        return redirect("resumen_lista", lista_id=lista.id)
+        
+    # Recuperamos las preferencias de la sesión
+    enfoque_a = request.session.get(f'enfoque_a_{lista.id}', "EQUILIBRADO")
+    enfoque_b = request.session.get(f'enfoque_b_{lista.id}', "EQUILIBRADO")
+    seed = request.session.get(f'seed_{lista.id}', 1)
+    
+    # Si el usuario apretó "Volver a armar equipos"
+    if request.method == "POST" and "rearmar" in request.POST:
+        seed += 1  # Cambiamos la semilla para generar un resultado distinto
+        request.session[f'seed_{lista.id}'] = seed
+    
+    # Si el usuario apretó "Guardar y finalizar"
+    if request.method == "POST" and "guardar" in request.POST:
+        messages.success(request, "¡Partido armado y guardado con éxito! A jugar.")
+        # Limpiamos la sesión
+        if f'seed_{lista.id}' in request.session:
+            del request.session[f'seed_{lista.id}']
+        return redirect("index")
+        
+    # Calculamos la cantidad de jugadores por equipo (ej: 10 jugadores = 5 vs 5)
+    players_per_team = len(jugadores) // 2
+    
+    # Ejecutamos TU algoritmo
+    resultado = armar_equipos(
+        jugadores=jugadores,
+        players_per_team=players_per_team,
+        enfoque_a=enfoque_a,
+        enfoque_b=enfoque_b,
+        seed=seed
+    )
+        
+    return render(
+        request, 
+        "equipos/ver_equipos.html", 
+        {
+            "lista": lista,
+            "resultado": resultado
+        }
+    )

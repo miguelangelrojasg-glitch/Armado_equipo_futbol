@@ -88,53 +88,26 @@
     .input-icon-wrapper .form-control-custom,
     .input-icon-wrapper .form-select-custom { padding-left: 45px; }
 
-    /* Estilos para los Range Sliders (Atributos) */
-    .atributo-box {
-        padding: 20px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        margin-bottom: 16px;
+    /* Estilo personalizado para las pestañas (Pills) */
+    .nav-pills .nav-link {
+        color: var(--text-soft);
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
     }
 
-    .range-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
+    .nav-pills .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
     }
 
-    .range-value {
-        font-weight: 800;
-        font-size: 1.2rem;
-        color: var(--accent-blue);
-        background: rgba(56, 189, 248, 0.1);
-        padding: 2px 12px;
-        border-radius: 8px;
-    }
-
-    /* Personalización del Range Input */
-    input[type=range] {
-        -webkit-appearance: none;
-        width: 100%;
-        background: transparent;
-    }
-    input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 20px;
-        width: 20px;
-        border-radius: 50%;
-        background: var(--accent-blue);
-        cursor: pointer;
-        margin-top: -7px;
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-    }
-    input[type=range]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 6px;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
     }
 
     /* Select múltiple */
@@ -150,6 +123,54 @@
     }
     .form-select-multiple option:checked {
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(56, 189, 248, 0.5));
+    }
+
+    /* ESTILOS DE LOS SLIDERS */
+    .custom-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        outline: none;
+        margin-top: 8px;
+        margin-bottom: 10px;
+    }
+
+    .custom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        transition: transform 0.1s;
+    }
+
+    .custom-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    .custom-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        border: none;
+    }
+    
+    /* Para los sliders amarillos del arquero */
+    .slider-warning::-webkit-slider-thumb {
+        background: #ffc107;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    .slider-warning::-moz-range-thumb {
+        background: #ffc107;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
     }
 </style>
 {% endblock %}
@@ -231,44 +252,305 @@
                     <i class="bi bi-sliders"></i> Atributos (1 al 10)
                 </h5>
 
-                <div class="atributo-box">
-                    <div class="range-header">
-                        <label class="form-label m-0"><i class="bi bi-crosshair me-1"></i> Ataque</label>
-                        <span class="range-value" id="val-ataque">5</span>
-                    </div>
-                    <input type="range" name="ataque" min="1" max="10" value="5" oninput="document.getElementById('val-ataque').innerText = this.value" required>
-                </div>
+                <ul class="nav nav-pills mb-4 justify-content-center gap-2" id="atributos-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ataque-tab" data-bs-toggle="pill" data-bs-target="#ataque" type="button" role="tab" aria-controls="ataque" aria-selected="true">
+                            <i class="bi bi-crosshair me-1"></i> Ataque
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="defensa-tab" data-bs-toggle="pill" data-bs-target="#defensa" type="button" role="tab" aria-controls="defensa" aria-selected="false">
+                            <i class="bi bi-shield-shaded me-1"></i> Defensa
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tecnica-tab" data-bs-toggle="pill" data-bs-target="#tecnica" type="button" role="tab" aria-controls="tecnica" aria-selected="false">
+                            <i class="bi bi-magic me-1"></i> Técnica
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="fisico-tab" data-bs-toggle="pill" data-bs-target="#fisico" type="button" role="tab" aria-controls="fisico" aria-selected="false">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Físico
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="arquero-tab" data-bs-toggle="pill" data-bs-target="#arquero" type="button" role="tab" aria-controls="arquero" aria-selected="false">
+                            <i class="bi bi-person-arms-up me-1"></i> Arquero
+                        </button>
+                    </li>
+                </ul>
 
-                <div class="atributo-box">
-                    <div class="range-header">
-                        <label class="form-label m-0"><i class="bi bi-shield-shaded me-1"></i> Defensa</label>
-                        <span class="range-value" id="val-defensa">5</span>
+                <div class="tab-content mb-4" id="atributos-tabContent">
+                    
+                    <div class="tab-pane fade show active" id="ataque" role="tabpanel" aria-labelledby="ataque-tab">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Finalización</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_finalizacion">5</span></span>
+                                    </div>
+                                    <input type="range" name="finalizacion" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_finalizacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Remate Cabeza</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_remate_cabeza">5</span></span>
+                                    </div>
+                                    <input type="range" name="remate_cabeza" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_remate_cabeza').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Desmarque</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_desmarque">5</span></span>
+                                    </div>
+                                    <input type="range" name="desmarque" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_desmarque').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Visión Juego</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_vision_juego">5</span></span>
+                                    </div>
+                                    <input type="range" name="vision_juego" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_vision_juego').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Tiros Lejanos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_tiros_lejanos">5</span></span>
+                                    </div>
+                                    <input type="range" name="tiros_lejanos" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_tiros_lejanos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Penales</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_penales">5</span></span>
+                                    </div>
+                                    <input type="range" name="penales" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_penales').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Córners</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_saques_esquina">5</span></span>
+                                    </div>
+                                    <input type="range" name="saques_esquina" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_saques_esquina').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Tiros Libres</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_tiros_libres">5</span></span>
+                                    </div>
+                                    <input type="range" name="tiros_libres" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_tiros_libres').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="range" name="defensa" min="1" max="10" value="5" oninput="document.getElementById('val-defensa').innerText = this.value" required>
-                </div>
 
-                <div class="atributo-box">
-                    <div class="range-header">
-                        <label class="form-label m-0"><i class="bi bi-magic me-1"></i> Técnica</label>
-                        <span class="range-value" id="val-tecnica">5</span>
+                    <div class="tab-pane fade" id="defensa" role="tabpanel" aria-labelledby="defensa-tab">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Entradas</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_entradas">5</span></span>
+                                    </div>
+                                    <input type="range" name="entradas" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_entradas').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Marcaje</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_marcaje">5</span></span>
+                                    </div>
+                                    <input type="range" name="marcaje" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_marcaje').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Anticipación</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_anticipacion">5</span></span>
+                                    </div>
+                                    <input type="range" name="anticipacion" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_anticipacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Colocación</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_colocacion">5</span></span>
+                                    </div>
+                                    <input type="range" name="colocacion" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_colocacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Intercepciones</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_intercepciones">5</span></span>
+                                    </div>
+                                    <input type="range" name="intercepciones" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_intercepciones').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Despeje</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_despeje">5</span></span>
+                                    </div>
+                                    <input type="range" name="despeje" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_despeje').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="range" name="tecnica" min="1" max="10" value="5" oninput="document.getElementById('val-tecnica').innerText = this.value" required>
-                </div>
 
-                <div class="atributo-box">
-                    <div class="range-header">
-                        <label class="form-label m-0"><i class="bi bi-lightning-charge me-1"></i> Físico</label>
-                        <span class="range-value" id="val-fisico">5</span>
+                    <div class="tab-pane fade" id="tecnica" role="tabpanel" aria-labelledby="tecnica-tab">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Control Balón</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_control_balon">5</span></span>
+                                    </div>
+                                    <input type="range" name="control_balon" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_control_balon').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Regate</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_regate">5</span></span>
+                                    </div>
+                                    <input type="range" name="regate" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_regate').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Pases Cortos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_pases_cortos">5</span></span>
+                                    </div>
+                                    <input type="range" name="pases_cortos" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_pases_cortos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Pases Largos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_pases_largos">5</span></span>
+                                    </div>
+                                    <input type="range" name="pases_largos" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_pases_largos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Centros</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_centros">5</span></span>
+                                    </div>
+                                    <input type="range" name="centros" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_centros').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Efecto</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_efecto">5</span></span>
+                                    </div>
+                                    <input type="range" name="efecto" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_efecto').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Téc. Disparo</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_tecnica_disparo">5</span></span>
+                                    </div>
+                                    <input type="range" name="tecnica_disparo" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_tecnica_disparo').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Juego Espaldas</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_juego_espaldas">5</span></span>
+                                    </div>
+                                    <input type="range" name="juego_espaldas" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_juego_espaldas').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="range" name="fisico" min="1" max="10" value="5" oninput="document.getElementById('val-fisico').innerText = this.value" required>
-                </div>
 
-                <div class="atributo-box border-warning" style="background: rgba(255, 193, 7, 0.05);">
-                    <div class="range-header">
-                        <label class="form-label m-0 text-warning"><i class="bi bi-person-arms-up me-1"></i> Atributo de arquero</label>
-                        <span class="range-value text-warning bg-warning bg-opacity-10" id="val-arquero">5</span>
+                    <div class="tab-pane fade" id="fisico" role="tabpanel" aria-labelledby="fisico-tab">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Velocidad</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_velocidad">5</span></span>
+                                    </div>
+                                    <input type="range" name="velocidad" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_velocidad').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Aceleración</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_aceleracion">5</span></span>
+                                    </div>
+                                    <input type="range" name="aceleracion" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_aceleracion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Fuerza</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_fuerza">5</span></span>
+                                    </div>
+                                    <input type="range" name="fuerza" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_fuerza').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Resistencia</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_resistencia">5</span></span>
+                                    </div>
+                                    <input type="range" name="resistencia" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_resistencia').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Salto</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_salto">5</span></span>
+                                    </div>
+                                    <input type="range" name="salto" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_salto').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Agilidad</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue); border: 1px solid rgba(56,189,248,0.3);"><span id="val_agilidad">5</span></span>
+                                    </div>
+                                    <input type="range" name="agilidad" class="custom-slider" min="1" max="10" value="5" required oninput="document.getElementById('val_agilidad').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="range" name="arquero" min="1" max="10" value="5" oninput="document.getElementById('val-arquero').innerText = this.value" required>
+
+                    <div class="tab-pane fade" id="arquero" role="tabpanel" aria-labelledby="arquero-tab">
+                        <div class="p-4 border-warning" style="background: rgba(255, 193, 7, 0.05); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 16px;">
+                            <div class="alert alert-info bg-transparent border-info text-info small py-2 mb-4">
+                                <i class="bi bi-info-circle"></i> Completar solo si la posición principal o secundaria es Arquero.
+                            </div>
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Reflejos</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);"><span id="val_reflejos">1</span></span>
+                                    </div>
+                                    <input type="range" name="reflejos" class="custom-slider slider-warning" min="1" max="10" value="1" oninput="document.getElementById('val_reflejos').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Estirada</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);"><span id="val_estirada">1</span></span>
+                                    </div>
+                                    <input type="range" name="estirada" class="custom-slider slider-warning" min="1" max="10" value="1" oninput="document.getElementById('val_estirada').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Posicionamiento</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);"><span id="val_posicionamiento">1</span></span>
+                                    </div>
+                                    <input type="range" name="posicionamiento" class="custom-slider slider-warning" min="1" max="10" value="1" oninput="document.getElementById('val_posicionamiento').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Manejo (Manos)</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);"><span id="val_manejo">1</span></span>
+                                    </div>
+                                    <input type="range" name="manejo" class="custom-slider slider-warning" min="1" max="10" value="1" oninput="document.getElementById('val_manejo').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Saque</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);"><span id="val_saque">1</span></span>
+                                    </div>
+                                    <input type="range" name="saque" class="custom-slider slider-warning" min="1" max="10" value="1" oninput="document.getElementById('val_saque').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <hr class="border-secondary my-4" style="opacity: 0.3;">

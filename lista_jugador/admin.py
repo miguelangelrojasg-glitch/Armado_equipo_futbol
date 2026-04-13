@@ -1,32 +1,25 @@
 from django.contrib import admin
-
-from .models import ListaJugadores, Jugador, AtributoEspecial
-
-
-@admin.register(ListaJugadores)
-class ListaJugadoresAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "usuario", "cantidad_jugadores", "fecha_creacion")
-    search_fields = ("nombre", "usuario__username")
-    list_filter = ("cantidad_jugadores", "fecha_creacion")
-
+from .models import AtributoEspecial, Jugador, ListaJugadores
 
 @admin.register(AtributoEspecial)
 class AtributoEspecialAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "posicion", "rubro", "modificador")
-    search_fields = ("nombre", "descripcion")
-    list_filter = ("posicion", "rubro")
+    # Qué columnas mostrar en la lista
+    list_display = ('nombre', 'posicion')
+    # Por qué campos se puede buscar
+    search_fields = ('nombre', 'posicion')
+    # Filtros laterales
+    list_filter = ('posicion',)
 
+@admin.register(ListaJugadores)
+class ListaJugadoresAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'usuario', 'cantidad_jugadores')
+    search_fields = ('nombre', 'usuario__username')
+    list_filter = ('usuario',)
 
 @admin.register(Jugador)
 class JugadorAdmin(admin.ModelAdmin):
-    list_display = (
-        "nombre",
-        "lista",
-        "posicion_principal",
-        "posicion_secundaria",
-        "nivel_general",
-        "fecha_creacion",
-    )
-    search_fields = ("nombre", "lista__nombre")
-    list_filter = ("posicion_principal", "posicion_secundaria", "fecha_creacion")
-    filter_horizontal = ("atributos_especiales",)
+    list_display = ('nombre', 'posicion_principal', 'lista', 'nivel_general')
+    search_fields = ('nombre', 'lista__nombre')
+    list_filter = ('posicion_principal', 'lista')
+    # Mostrar el nivel como solo lectura ya que se calcula automáticamente
+    readonly_fields = ('nivel_general',)

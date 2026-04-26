@@ -28,13 +28,19 @@
                             <li class="list-group-item bg-transparent text-white border-secondary border-opacity-25 d-flex justify-content-between align-items-center px-0">
                                 <div>
                                     {% if j.id == resultado.gk_a_id %}
-                                        <i class="bi bi-hands text-warning me-2" title="Arquero"></i>
+                                        <i class="bi bi-person-arms-up text-warning me-2" title="Arquero"></i>
                                     {% else %}
                                         <i class="bi bi-person text-soft me-2"></i>
                                     {% endif %}
                                     <span class="fw-bold">{{ j.nombre }}</span>
                                 </div>
-                                <span class="badge bg-dark border border-secondary">{{ j.posicion_principal }}</span>
+                                <span class="badge 
+                                    {% if j.posicion_principal == 'ARQ' %}bg-warning text-dark
+                                    {% elif j.posicion_principal == 'DEF' %}bg-primary
+                                    {% elif j.posicion_principal == 'MED' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ j.posicion_principal }}
+                                </span>
                             </li>
                         {% endfor %}
                     </ul>
@@ -60,13 +66,19 @@
                             <li class="list-group-item bg-transparent text-white border-secondary border-opacity-25 d-flex justify-content-between align-items-center px-0">
                                 <div>
                                     {% if j.id == resultado.gk_b_id %}
-                                        <i class="bi bi-hands text-warning me-2" title="Arquero"></i>
+                                        <i class="bi bi-person-arms-up text-warning me-2" title="Arquero"></i>
                                     {% else %}
                                         <i class="bi bi-person text-soft me-2"></i>
                                     {% endif %}
                                     <span class="fw-bold">{{ j.nombre }}</span>
                                 </div>
-                                <span class="badge bg-dark border border-secondary">{{ j.posicion_principal }}</span>
+                                <span class="badge 
+                                    {% if j.posicion_principal == 'ARQ' %}bg-warning text-dark
+                                    {% elif j.posicion_principal == 'DEF' %}bg-primary
+                                    {% elif j.posicion_principal == 'MED' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ j.posicion_principal }}
+                                </span>
                             </li>
                         {% endfor %}
                     </ul>
@@ -77,16 +89,22 @@
 
     <div class="mt-5 glass-card p-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
         <div class="text-soft">
-            <i class="bi bi-info-circle me-1"></i> ¿Los equipos no te convencen? Mezclalos de nuevo manteniendo el balance.
+            <i class="bi bi-info-circle me-1"></i> ¿Los equipos no te convencen? Mezclalos de nuevo o ajusta la estrategia.
         </div>
-        <div class="d-flex gap-2 w-100 justify-content-md-end" style="max-width: 400px;">
-            <form method="post" class="w-50">
+        
+        <div class="d-flex flex-wrap gap-2 w-100 justify-content-md-end" style="max-width: 550px;">
+            <a href="{% url 'configurar_equipos' lista.id %}" class="btn flex-grow-1" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: var(--text-soft);">
+                <i class="bi bi-sliders me-1"></i> Cambiar Enfoque
+            </a>
+            
+            <form method="post" class="flex-grow-1 d-flex m-0">
                 {% csrf_token %}
                 <button type="submit" name="rearmar" class="btn btn-outline-info w-100" style="border-radius: 12px;">
                     <i class="bi bi-arrow-clockwise me-1"></i> Rearmar
                 </button>
             </form>
-            <form method="post" class="w-50">
+            
+            <form method="post" class="flex-grow-1 d-flex m-0">
                 {% csrf_token %}
                 <button type="submit" name="guardar" class="btn btn-main w-100" style="border-radius: 12px;">
                     <i class="bi bi-check-circle me-1"></i> Guardar

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Resumen de {{ lista.nombre }} | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .focus-container { padding: 2rem 0; }
+    
+    .header-card {
+        padding: 25px 35px;
+        border-radius: 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-main);
+        margin-bottom: 2rem;
+    }
+
+    .player-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 20px;
+    }
+
+    .player-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .player-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+    }
+
+    /* Contenedor del gráfico para que no se desborde */
+    .chart-container {
+        width: 120px;
+        height: 120px;
+        position: relative;
+    }
+
+    .specialty-badge {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(56, 189, 248, 0.15));
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        color: #c4b5fd;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-action {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .btn-edit { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid transparent; }
+    .btn-edit:hover { background: rgba(56, 189, 248, 0.2); color: #bae6fd; }
+    
+    .btn-delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid transparent; }
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center focus-container">
+    <div class="col-12 col-xl-10">
+
+        <div class="glass-card header-card d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div>
+                <h2 class="fw-bold m-0"><i class="bi bi-shield-shaded text-success me-2"></i>{{ lista.nombre }}</h2>
+                <div class="text-soft mt-1">
+                    <i class="bi bi-people me-1"></i> {{ jugadores.count }} / {{ lista.cantidad_jugadores }} Jugadores cargados | 
+                    <i class="bi bi-bar-chart me-1"></i> Nivel Total: {{ nivel_total|floatformat:1 }}
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <a href="{% url 'agregar_jugador' lista.id %}" class="btn btn-soft" title="Agregar más">
+                    <i class="bi bi-person-plus-fill"></i>
+                </a>
+                <a href="{% url 'configurar_equipos' lista.id %}" class="btn btn-main px-4 fw-bold shadow-lg" {% if jugadores.count < 2 %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
+                    <i class="bi bi-diagram-3-fill me-1"></i> Armar Equipos
+                </a>
+            </div>
+        </div>
+
+        <div class="player-grid">
+            {% for jugador in jugadores %}
+                <div class="player-card">
+                    
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h4 class="fw-bold m-0 text-white">{{ jugador.nombre }}</h4>
+                                <span class="badge 
+                                    {% if jugador.posicion_principal == 'ARQ' %}bg-warning text-dark
+                                    {% elif jugador.posicion_principal == 'DEF' %}bg-primary
+                                    {% elif jugador.posicion_principal == 'MED' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ jugador.posicion_principal }}
+                                </span>
+                            </div>
+                            
+                            {% if jugador.posicion_secundaria %}
+                                <div class="text-soft small mb-2">
+                                    <i class="bi bi-arrow-return-right"></i> Alt: {{ jugador.posicion_secundaria }}
+                                </div>
+                            {% else %}
+                                <div class="mb-2" style="height: 20px;"></div>
+                            {% endif %}
+
+                            <div class="text-white small fw-bold">Nivel: <span class="text-info">{{ jugador.nivel_general|floatformat:1 }}</span></div>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="chart-{{ jugador.id }}"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {% for especialidad in jugador.atributos_especiales.all %}
+                            <div class="specialty-badge me-1 mb-1" title="{{ especialidad.descripcion }}">
+                                <i class="bi bi-star-fill text-warning" style="font-size: 0.6rem;"></i> 
+                                {{ especialidad.nombre }}
+                            </div>
+                        {% empty %}
+                            <div class="text-soft small" style="opacity: 0.5;">Sin especialidades</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 border-top border-secondary pt-3" style="border-opacity: 0.2;">
+                        <a href="{% url 'editar_jugador' jugador.id %}" class="btn-action btn-edit text-decoration-none">
+                            <i class="bi bi-pencil me-1"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_jugador' jugador.id %}" class="btn-action btn-delete text-decoration-none" onclick="return confirm('¿Seguro que querés borrar a {{ jugador.nombre }}?');">
+                            <i class="bi bi-trash me-1"></i> Borrar
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-soft p-5 glass-card" style="border-radius: 20px;">
+                    <i class="bi bi-emoji-frown fs-1 mb-3 d-block opacity-50"></i>
+                    <h4>No hay jugadores todavía</h4>
+                    <p>Agregá jugadores para empezar a ver sus estadísticas y armar los equipos.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Configuramos colores por defecto para los gráficos
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        {% for jugador in jugadores %}
+            {% with promedios=jugador.calcular_promedios %}
+            // Encerramos cada iteración en su propio bloque {} para que las variables "let" no colisionen
+            {
+                let atq = parseFloat("{{ promedios.ATAQUE }}".replace(',', '.'));
+                let def = parseFloat("{{ promedios.DEFENSA }}".replace(',', '.'));
+                let tec = parseFloat("{{ promedios.TECNICA }}".replace(',', '.'));
+                let fis = parseFloat("{{ promedios.FISICO }}".replace(',', '.'));
+
+                let canvas = document.getElementById('chart-{{ jugador.id }}');
+                
+                if (canvas) {
+                    let ctx = canvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Atq', 'Tec', 'Def', 'Fis'], // Orden circular
+                            datasets: [{
+                                label: 'Nivel',
+                                data: [atq, tec, def, fis],
+                                backgroundColor: 'rgba(56, 189, 248, 0.2)', // Azul transparente
+                                borderColor: 'rgba(56, 189, 248, 1)',       // Azul sólido
+                                pointBackgroundColor: 'rgba(139, 92, 246, 1)', // Puntos violetas
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgba(139, 92, 246, 1)',
+                                borderWidth: 2,
+                                pointRadius: 2,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }, // Ocultamos la leyenda
+                                tooltip: { enabled: false } // Ocultamos tooltips para diseño limpio
+                            },
+                            scales: {
+                                r: {
+                                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)', circular: true },
+                                    pointLabels: {
+                                        font: { size: 9, weight: 'bold' },
+                                        color: 'rgba(255, 255, 255, 0.7)'
+                                    },
+                                    ticks: {
+                                        display: false, // Oculta los números internos
+                                        min: 0,
+                                        max: 10,
+                                        stepSize: 2
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            {% endwith %}
+        {% endfor %}
+    });
+</script>
+{% endblock %}

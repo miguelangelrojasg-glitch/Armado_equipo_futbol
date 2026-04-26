@@ -258,6 +258,9 @@ def agregar_jugador(request, lista_id):
             messages.success(request, f"Jugador guardado con éxito. Faltan cargar {jugadores_restantes} jugadores más.")
             return redirect("agregar_jugador", lista_id=lista.id)
 
+    # Traemos todos los atributos especiales para enviarlos al template HTML
+    atributos_especiales = AtributoEspecial.objects.all()
+
     return render(
         request,
         "listas/agregar_jugador.html",
@@ -270,6 +273,7 @@ def agregar_jugador(request, lista_id):
             "campos_arquero": campos_arquero,
             "jugadores_actuales": lista.jugadores.count(),
             "cantidad_total": lista.cantidad_jugadores,
+            "atributos_especiales": atributos_especiales, # Variable añadida al diccionario
         }
     )
 
@@ -479,7 +483,7 @@ def ver_equipos(request, lista_id):
     # Calculamos la cantidad de jugadores por equipo (ej: 10 jugadores = 5 vs 5)
     players_per_team = len(jugadores) // 2
     
-    # Ejecutamos TU algoritmo
+    # Ejecutamos el algoritmo
     resultado = armar_equipos(
         jugadores=jugadores,
         players_per_team=players_per_team,

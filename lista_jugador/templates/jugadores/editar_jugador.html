@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+{% block title %}Editar jugador | Futbol Team{% endblock %}
+
+{% block extra_css %}
+<style>
+    .focus-container { padding: 2rem 0; }
+
+    .form-card {
+        padding: 35px;
+        border-radius: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-main);
+    }
+
+    .section-title {
+        font-weight: 800;
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+    }
+
+    .form-control-custom, .form-select-custom {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        color: white;
+        border-radius: 12px;
+        padding: 12px 16px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-select-custom { appearance: none; }
+    .form-select-custom option { background-color: var(--bg-main); color: white; }
+
+    .form-control-custom:focus, .form-select-custom:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        outline: none;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .input-icon-wrapper { position: relative; }
+    .input-icon-wrapper i.icon-left {
+        position: absolute; top: 50%; left: 16px; transform: translateY(-50%);
+        color: var(--text-soft); font-size: 1.1rem; pointer-events: none;
+    }
+    .input-icon-wrapper i.icon-right {
+        position: absolute; top: 50%; right: 16px; transform: translateY(-50%);
+        color: var(--text-soft); pointer-events: none;
+    }
+    .input-icon-wrapper .form-control-custom,
+    .input-icon-wrapper .form-select-custom { padding-left: 45px; }
+
+    .nav-pills .nav-link {
+        color: var(--text-soft);
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    .nav-pills .nav-link:hover { color: white; background: rgba(255, 255, 255, 0.05); }
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .custom-slider {
+        -webkit-appearance: none; width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px; outline: none; margin-top: 8px; margin-bottom: 10px;
+    }
+    .custom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+        background: var(--accent-blue); cursor: pointer; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        transition: transform 0.1s;
+    }
+    .custom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .custom-slider::-moz-range-thumb {
+        width: 18px; height: 18px; border-radius: 50%; background: var(--accent-blue);
+        cursor: pointer; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); border: none;
+    }
+    
+    .slider-warning::-webkit-slider-thumb { background: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); }
+    .slider-warning::-moz-range-thumb { background: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); }
+
+    .posicion-title {
+        font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        color: #94a3b8; margin-top: 1.5rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;
+    }
+    .posicion-title::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
+
+    .atributos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .atributo-card { cursor: pointer; display: block; margin: 0; height: 100%; }
+    .atributo-card input { display: none; }
+    .atributo-content {
+        background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-soft); border-radius: 12px;
+        padding: 12px 10px; color: var(--text-soft); text-align: center; transition: all 0.3s ease;
+        user-select: none; height: 100%; display: flex; flex-direction: column; justify-content: center;
+    }
+    .atributo-desc { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-top: 6px; line-height: 1.3; font-weight: 400; transition: color 0.3s ease; }
+    
+    .atributo-card:hover .atributo-content { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+    .atributo-card:hover .atributo-desc { color: rgba(255, 255, 255, 0.8); }
+    .atributo-card input:checked + .atributo-content {
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(139, 92, 246, 0.15));
+        border-color: var(--accent-blue); color: white; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); transform: translateY(0);
+    }
+    .atributo-card input:checked + .atributo-content .atributo-desc { color: rgba(255, 255, 255, 0.9); }
+    .atributo-card input:disabled + .atributo-content { opacity: 0.3; cursor: not-allowed; transform: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center focus-container">
+    <div class="col-lg-8 col-xl-7">
+
+        <div class="glass-card form-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold m-0"><i class="bi bi-pencil-square text-primary me-2"></i>Editar jugador</h2>
+                    <p class="text-soft mt-1 mb-0 fs-5 text-white">{{ jugador.nombre }}</p>
+                </div>
+                <span class="badge bg-dark border border-secondary p-2">
+                    <i class="bi bi-list-ul me-1"></i> {{ jugador.lista.nombre }}
+                </span>
+            </div>
+
+            <form method="post" action="">
+                {% csrf_token %}
+
+                <h5 class="section-title mt-4 pt-2">
+                    <i class="bi bi-person-badge"></i> Datos Básicos
+                </h5>
+
+                <div class="mb-4">
+                    <label for="nombre" class="form-label">Nombre o apodo</label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-type icon-left"></i>
+                        <input type="text" id="nombre" name="nombre" class="form-control-custom" value="{{ jugador.nombre }}" required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="posicion_principal" class="form-label">Posición principal</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-geo-alt icon-left"></i>
+                            <select id="posicion_principal" name="posicion_principal" class="form-select-custom" required>
+                                <option value="ARQ" {% if jugador.posicion_principal == 'ARQ' %}selected{% endif %}>🧤 Arquero</option>
+                                <option value="DEF" {% if jugador.posicion_principal == 'DEF' %}selected{% endif %}>🛡️ Defensor</option>
+                                <option value="MED" {% if jugador.posicion_principal == 'MED' %}selected{% endif %}>🧠 Mediocampista</option>
+                                <option value="DEL" {% if jugador.posicion_principal == 'DEL' %}selected{% endif %}>⚡ Delantero</option>
+                            </select>
+                            <i class="bi bi-chevron-down icon-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="posicion_secundaria" class="form-label">Posición secundaria</label>
+                        <div class="input-icon-wrapper">
+                            <i class="bi bi-geo icon-left"></i>
+                            <select id="posicion_secundaria" name="posicion_secundaria" class="form-select-custom">
+                                <option value="" {% if not jugador.posicion_secundaria %}selected{% endif %}>Ninguna (Opcional)</option>
+                                <option value="ARQ" {% if jugador.posicion_secundaria == 'ARQ' %}selected{% endif %}>🧤 Arquero</option>
+                                <option value="DEF" {% if jugador.posicion_secundaria == 'DEF' %}selected{% endif %}>🛡️ Defensor</option>
+                                <option value="MED" {% if jugador.posicion_secundaria == 'MED' %}selected{% endif %}>🧠 Mediocampista</option>
+                                <option value="DEL" {% if jugador.posicion_secundaria == 'DEL' %}selected{% endif %}>⚡ Delantero</option>
+                            </select>
+                            <i class="bi bi-chevron-down icon-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+                <h5 class="section-title">
+                    <i class="bi bi-sliders"></i> Atributos (1 al 10)
+                </h5>
+
+                <ul class="nav nav-pills mb-4 justify-content-center gap-2" id="atributos-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ataque-tab" data-bs-toggle="pill" data-bs-target="#ataque" type="button" role="tab">
+                            <i class="bi bi-crosshair me-1"></i> Ataque
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="defensa-tab" data-bs-toggle="pill" data-bs-target="#defensa" type="button" role="tab">
+                            <i class="bi bi-shield-shaded me-1"></i> Defensa
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tecnica-tab" data-bs-toggle="pill" data-bs-target="#tecnica" type="button" role="tab">
+                            <i class="bi bi-magic me-1"></i> Técnica
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="fisico-tab" data-bs-toggle="pill" data-bs-target="#fisico" type="button" role="tab">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Físico
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="arquero-tab" data-bs-toggle="pill" data-bs-target="#arquero" type="button" role="tab">
+                            <i class="bi bi-person-arms-up me-1"></i> Arquero
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mb-4" id="atributos-tabContent">
+                    
+                    <!-- ATAQUE -->
+                    <div class="tab-pane fade show active" id="ataque" role="tabpanel">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                {% for campo, valor in jugador.calcular_promedios.items %} <!-- Hack temporal para iterar o simplemente manual -->
+                                {% endfor %}
+                                
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Finalización</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_finalizacion">{{ jugador.finalizacion }}</span></span>
+                                    </div>
+                                    <input type="range" name="finalizacion" class="custom-slider" min="1" max="10" value="{{ jugador.finalizacion }}" required oninput="document.getElementById('val_finalizacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Remate Cabeza</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_remate_cabeza">{{ jugador.remate_cabeza }}</span></span>
+                                    </div>
+                                    <input type="range" name="remate_cabeza" class="custom-slider" min="1" max="10" value="{{ jugador.remate_cabeza }}" required oninput="document.getElementById('val_remate_cabeza').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Desmarque</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_desmarque">{{ jugador.desmarque }}</span></span>
+                                    </div>
+                                    <input type="range" name="desmarque" class="custom-slider" min="1" max="10" value="{{ jugador.desmarque }}" required oninput="document.getElementById('val_desmarque').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Visión Juego</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_vision_juego">{{ jugador.vision_juego }}</span></span>
+                                    </div>
+                                    <input type="range" name="vision_juego" class="custom-slider" min="1" max="10" value="{{ jugador.vision_juego }}" required oninput="document.getElementById('val_vision_juego').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Tiros Lejanos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_tiros_lejanos">{{ jugador.tiros_lejanos }}</span></span>
+                                    </div>
+                                    <input type="range" name="tiros_lejanos" class="custom-slider" min="1" max="10" value="{{ jugador.tiros_lejanos }}" required oninput="document.getElementById('val_tiros_lejanos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Penales</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_penales">{{ jugador.penales }}</span></span>
+                                    </div>
+                                    <input type="range" name="penales" class="custom-slider" min="1" max="10" value="{{ jugador.penales }}" required oninput="document.getElementById('val_penales').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Córners</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_saques_esquina">{{ jugador.saques_esquina }}</span></span>
+                                    </div>
+                                    <input type="range" name="saques_esquina" class="custom-slider" min="1" max="10" value="{{ jugador.saques_esquina }}" required oninput="document.getElementById('val_saques_esquina').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Tiros Libres</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_tiros_libres">{{ jugador.tiros_libres }}</span></span>
+                                    </div>
+                                    <input type="range" name="tiros_libres" class="custom-slider" min="1" max="10" value="{{ jugador.tiros_libres }}" required oninput="document.getElementById('val_tiros_libres').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEFENSA -->
+                    <div class="tab-pane fade" id="defensa" role="tabpanel">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Entradas</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_entradas">{{ jugador.entradas }}</span></span>
+                                    </div>
+                                    <input type="range" name="entradas" class="custom-slider" min="1" max="10" value="{{ jugador.entradas }}" required oninput="document.getElementById('val_entradas').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Marcaje</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_marcaje">{{ jugador.marcaje }}</span></span>
+                                    </div>
+                                    <input type="range" name="marcaje" class="custom-slider" min="1" max="10" value="{{ jugador.marcaje }}" required oninput="document.getElementById('val_marcaje').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Anticipación</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_anticipacion">{{ jugador.anticipacion }}</span></span>
+                                    </div>
+                                    <input type="range" name="anticipacion" class="custom-slider" min="1" max="10" value="{{ jugador.anticipacion }}" required oninput="document.getElementById('val_anticipacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Colocación</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_colocacion">{{ jugador.colocacion }}</span></span>
+                                    </div>
+                                    <input type="range" name="colocacion" class="custom-slider" min="1" max="10" value="{{ jugador.colocacion }}" required oninput="document.getElementById('val_colocacion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Intercepciones</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_intercepciones">{{ jugador.intercepciones }}</span></span>
+                                    </div>
+                                    <input type="range" name="intercepciones" class="custom-slider" min="1" max="10" value="{{ jugador.intercepciones }}" required oninput="document.getElementById('val_intercepciones').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Despeje</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_despeje">{{ jugador.despeje }}</span></span>
+                                    </div>
+                                    <input type="range" name="despeje" class="custom-slider" min="1" max="10" value="{{ jugador.despeje }}" required oninput="document.getElementById('val_despeje').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TECNICA -->
+                    <div class="tab-pane fade" id="tecnica" role="tabpanel">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Control Balón</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_control_balon">{{ jugador.control_balon }}</span></span>
+                                    </div>
+                                    <input type="range" name="control_balon" class="custom-slider" min="1" max="10" value="{{ jugador.control_balon }}" required oninput="document.getElementById('val_control_balon').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Regate</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_regate">{{ jugador.regate }}</span></span>
+                                    </div>
+                                    <input type="range" name="regate" class="custom-slider" min="1" max="10" value="{{ jugador.regate }}" required oninput="document.getElementById('val_regate').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Pases Cortos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_pases_cortos">{{ jugador.pases_cortos }}</span></span>
+                                    </div>
+                                    <input type="range" name="pases_cortos" class="custom-slider" min="1" max="10" value="{{ jugador.pases_cortos }}" required oninput="document.getElementById('val_pases_cortos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Pases Largos</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_pases_largos">{{ jugador.pases_largos }}</span></span>
+                                    </div>
+                                    <input type="range" name="pases_largos" class="custom-slider" min="1" max="10" value="{{ jugador.pases_largos }}" required oninput="document.getElementById('val_pases_largos').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Centros</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_centros">{{ jugador.centros }}</span></span>
+                                    </div>
+                                    <input type="range" name="centros" class="custom-slider" min="1" max="10" value="{{ jugador.centros }}" required oninput="document.getElementById('val_centros').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Efecto</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_efecto">{{ jugador.efecto }}</span></span>
+                                    </div>
+                                    <input type="range" name="efecto" class="custom-slider" min="1" max="10" value="{{ jugador.efecto }}" required oninput="document.getElementById('val_efecto').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Téc. Disparo</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_tecnica_disparo">{{ jugador.tecnica_disparo }}</span></span>
+                                    </div>
+                                    <input type="range" name="tecnica_disparo" class="custom-slider" min="1" max="10" value="{{ jugador.tecnica_disparo }}" required oninput="document.getElementById('val_tecnica_disparo').innerText = this.value">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Juego Espaldas</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_juego_espaldas">{{ jugador.juego_espaldas }}</span></span>
+                                    </div>
+                                    <input type="range" name="juego_espaldas" class="custom-slider" min="1" max="10" value="{{ jugador.juego_espaldas }}" required oninput="document.getElementById('val_juego_espaldas').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FISICO -->
+                    <div class="tab-pane fade" id="fisico" role="tabpanel">
+                        <div class="p-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Velocidad</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_velocidad">{{ jugador.velocidad }}</span></span>
+                                    </div>
+                                    <input type="range" name="velocidad" class="custom-slider" min="1" max="10" value="{{ jugador.velocidad }}" required oninput="document.getElementById('val_velocidad').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Aceleración</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_aceleracion">{{ jugador.aceleracion }}</span></span>
+                                    </div>
+                                    <input type="range" name="aceleracion" class="custom-slider" min="1" max="10" value="{{ jugador.aceleracion }}" required oninput="document.getElementById('val_aceleracion').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Fuerza</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_fuerza">{{ jugador.fuerza }}</span></span>
+                                    </div>
+                                    <input type="range" name="fuerza" class="custom-slider" min="1" max="10" value="{{ jugador.fuerza }}" required oninput="document.getElementById('val_fuerza').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Resistencia</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_resistencia">{{ jugador.resistencia }}</span></span>
+                                    </div>
+                                    <input type="range" name="resistencia" class="custom-slider" min="1" max="10" value="{{ jugador.resistencia }}" required oninput="document.getElementById('val_resistencia').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Salto</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_salto">{{ jugador.salto }}</span></span>
+                                    </div>
+                                    <input type="range" name="salto" class="custom-slider" min="1" max="10" value="{{ jugador.salto }}" required oninput="document.getElementById('val_salto').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Agilidad</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_agilidad">{{ jugador.agilidad }}</span></span>
+                                    </div>
+                                    <input type="range" name="agilidad" class="custom-slider" min="1" max="10" value="{{ jugador.agilidad }}" required oninput="document.getElementById('val_agilidad').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Equilibrio</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_equilibrio">{{ jugador.equilibrio|default:5 }}</span></span>
+                                    </div>
+                                    <input type="range" name="equilibrio" class="custom-slider" min="1" max="10" value="{{ jugador.equilibrio|default:5 }}" required oninput="document.getElementById('val_equilibrio').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-soft small mb-0">Potencia Salto</label>
+                                        <span class="badge" style="background: rgba(56,189,248,0.15); color: var(--accent-blue);"><span id="val_potencia_salto">{{ jugador.potencia_salto|default:5 }}</span></span>
+                                    </div>
+                                    <input type="range" name="potencia_salto" class="custom-slider" min="1" max="10" value="{{ jugador.potencia_salto|default:5 }}" required oninput="document.getElementById('val_potencia_salto').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ARQUERO -->
+                    <div class="tab-pane fade" id="arquero" role="tabpanel">
+                        <div class="p-4 border-warning" style="background: rgba(255, 193, 7, 0.05); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 16px;">
+                            <div class="row g-4">
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Reflejos</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_reflejos">{{ jugador.reflejos|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="reflejos" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.reflejos|default:1 }}" oninput="document.getElementById('val_reflejos').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Estirada</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_estirada">{{ jugador.estirada|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="estirada" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.estirada|default:1 }}" oninput="document.getElementById('val_estirada').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Manejo Área</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_manejo_area">{{ jugador.manejo_area|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="manejo_area" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.manejo_area|default:1 }}" oninput="document.getElementById('val_manejo_area').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Blocaje</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_blocaje">{{ jugador.blocaje|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="blocaje" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.blocaje|default:1 }}" oninput="document.getElementById('val_blocaje').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Saque Meta</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_saque_meta">{{ jugador.saque_meta|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="saque_meta" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.saque_meta|default:1 }}" oninput="document.getElementById('val_saque_meta').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Saque Mano</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_saque_mano">{{ jugador.saque_mano|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="saque_mano" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.saque_mano|default:1 }}" oninput="document.getElementById('val_saque_mano').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Uno contra Uno</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_uno_contra_uno">{{ jugador.uno_contra_uno|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="uno_contra_uno" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.uno_contra_uno|default:1 }}" oninput="document.getElementById('val_uno_contra_uno').innerText = this.value">
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label text-warning small mb-0">Comunicación</label>
+                                        <span class="badge" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;"><span id="val_comunicacion">{{ jugador.comunicacion|default:1 }}</span></span>
+                                    </div>
+                                    <input type="range" name="comunicacion" class="custom-slider slider-warning" min="1" max="10" value="{{ jugador.comunicacion|default:1 }}" oninput="document.getElementById('val_comunicacion').innerText = this.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="border-secondary my-4" style="opacity: 0.3;">
+
+                <h5 class="section-title">
+                    <i class="bi bi-star-fill text-warning"></i> Especialidades
+                </h5>
+                <p class="text-soft small mb-4">Selecciona hasta 2 atributos especiales. Los preexistentes ya están seleccionados.</p>
+
+                <!-- DELANTEROS -->
+                <div class="posicion-title"><i class="bi bi-lightning-charge-fill text-danger"></i> Delanteros (DEL)</div>
+                <div class="atributos-grid mb-4">
+                    {% for atributo in atributos_especiales %}
+                        {% if atributo.posicion == 'DEL' %}
+                            <label class="atributo-card">
+                                <input type="checkbox" name="atributos_especiales" value="{{ atributo.id }}" class="atributo-checkbox" {% if atributo in jugador.atributos_especiales.all %}checked{% endif %}>
+                                <div class="atributo-content">
+                                    <div class="fw-bold">{{ atributo.nombre }}</div>
+                                    <div class="atributo-desc">{{ atributo.descripcion }}</div>
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- MEDIOCAMPISTAS -->
+                <div class="posicion-title"><i class="bi bi-bullseye text-success"></i> Mediocampistas (MED)</div>
+                <div class="atributos-grid mb-4">
+                    {% for atributo in atributos_especiales %}
+                        {% if atributo.posicion == 'MED' %}
+                            <label class="atributo-card">
+                                <input type="checkbox" name="atributos_especiales" value="{{ atributo.id }}" class="atributo-checkbox" {% if atributo in jugador.atributos_especiales.all %}checked{% endif %}>
+                                <div class="atributo-content">
+                                    <div class="fw-bold">{{ atributo.nombre }}</div>
+                                    <div class="atributo-desc">{{ atributo.descripcion }}</div>
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- DEFENSORES -->
+                <div class="posicion-title"><i class="bi bi-shield-shaded text-primary"></i> Defensores (DEF)</div>
+                <div class="atributos-grid mb-4">
+                    {% for atributo in atributos_especiales %}
+                        {% if atributo.posicion == 'DEF' %}
+                            <label class="atributo-card">
+                                <input type="checkbox" name="atributos_especiales" value="{{ atributo.id }}" class="atributo-checkbox" {% if atributo in jugador.atributos_especiales.all %}checked{% endif %}>
+                                <div class="atributo-content">
+                                    <div class="fw-bold">{{ atributo.nombre }}</div>
+                                    <div class="atributo-desc">{{ atributo.descripcion }}</div>
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- ARQUEROS -->
+                <div class="posicion-title"><i class="bi bi-person-arms-up text-warning"></i> Arqueros (ARQ)</div>
+                <div class="atributos-grid mb-4">
+                    {% for atributo in atributos_especiales %}
+                        {% if atributo.posicion == 'ARQ' %}
+                            <label class="atributo-card">
+                                <input type="checkbox" name="atributos_especiales" value="{{ atributo.id }}" class="atributo-checkbox" {% if atributo in jugador.atributos_especiales.all %}checked{% endif %}>
+                                <div class="atributo-content">
+                                    <div class="fw-bold">{{ atributo.nombre }}</div>
+                                    <div class="atributo-desc">{{ atributo.descripcion }}</div>
+                                </div>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center gap-3 mt-5">
+                    <a href="{% url 'resumen_lista' jugador.lista.id %}" class="btn btn-soft flex-grow-1 text-center">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-main flex-grow-1">
+                        <i class="bi bi-check2-circle me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.atributo-checkbox');
+        const maxPermitidos = 2;
+
+        function actualizarEstadoCheckboxes() {
+            const marcados = document.querySelectorAll('.atributo-checkbox:checked').length;
+            if (marcados >= maxPermitidos) {
+                checkboxes.forEach(cb => { if (!cb.checked) cb.disabled = true; });
+            } else {
+                checkboxes.forEach(cb => { cb.disabled = false; });
+            }
+        }
+
+        checkboxes.forEach(cb => { cb.addEventListener('change', actualizarEstadoCheckboxes); });
+        
+        // Ejecutar al cargar por si el jugador ya tiene 2 seleccionados
+        actualizarEstadoCheckboxes();
+    });
+</script>
+
+{% endblock %}
